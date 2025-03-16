@@ -1,0 +1,10 @@
+*.pdf
+*.mp3
+*.wav
+
+# Virtual environment
+microservice/
+.env
+.microservice/
+pip-log.txt
+pip-delete-this-directory.txt
