@@ -29,15 +29,15 @@ def mp3_to_wav(filename):
 def transcribe_single_audio(filename):
     audio_filepath = os.path.join(AUDIO_DIR, filename)
     if not os.path.exists(audio_filepath):
-        return {"filename": filename, "transcription": "File not found."}
+        return {"filename": filename, "transcription": "File not found.", "duration": 0.0}
 
     try:
         with open(audio_filepath, "rb") as file:
             response = requests.post(API_URL, files={"file": file})
             if response.status_code == 200:
-                return filename, response.json().get("transcription", "No transcription found.")
+                return filename, response.json().get("transcription", "No transcription found."), response.json().get("duration", "0.0")
             else:
-                return filename, f"error {response.status_code}"
+                return filename, f"error {response.status_code}", "0.0"
     except Exception as e:
         return filename, f"error: {str(e)}"
 

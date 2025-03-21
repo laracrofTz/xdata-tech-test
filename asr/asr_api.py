@@ -59,7 +59,7 @@ def audio_transcription():
         predicted_ids = torch.argmax(logits, dim=-1)
         transcription = processor.batch_decode(predicted_ids)[0]
         #duration = sf.info(f"{audio_out_path}/{audio_filename}.wav").duration
-        duration = len(audio) / 16000
+        duration = round(len(audio) / 16000, 1)
 
         return jsonify({"transcription": transcription, "duration": str(duration)})
 
