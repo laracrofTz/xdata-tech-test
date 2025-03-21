@@ -1,4 +1,4 @@
-import os, subprocess
+import os, subprocess, io
 from flask import Flask, jsonify, request
 import soundfile as sf
 
@@ -12,6 +12,15 @@ port = int(os.environ.get('PORT', 8001))
 processor = Wav2Vec2Processor.from_pretrained("facebook/wav2vec2-large-960h")
 model = Wav2Vec2ForCTC.from_pretrained("facebook/wav2vec2-large-960h")
 
+# create the directory if doesnt exist
+if not os.path.exists("./mp3_audio"):
+    os.makedirs("./mp3_audio")
+if not os.path.exists("./wav_audio"):
+    os.makedirs("./wav_audio")
+
+audio_in_path = "./mp3_audio"
+audio_out_path = "./wav_audio"
+
 # TASK 2B, assume that asr_api.py is the main server file?
 @app.route('/ping', methods=['GET'])
 def ping():
@@ -23,30 +32,34 @@ def audio_transcription():
     if "file" not in request.files:
         return jsonify({"error": "No audio file provided."}), 400
 
-    audio_in_path = "./mp3_audio"
-    audio_out_path = "./wav_audio"
+    print(f"Processing request for: {request.files['file'].filename}")
 
-    mp3_file = request.files["file"]
-    audio_filename = mp3_file.filename.split(".")[0]
-    mp3_file.save(os.path.join(audio_in_path, mp3_file.filename))
+    audio_file = request.files["file"]
+    audio_filename = audio_file.filename.split(".")[0]
 
     # convert mp3 to wav files + resampling to 16kHz
     try:
-        subprocess.run(
-            ["ffmpeg", "-i", f"{audio_in_path}/{mp3_file.filename}",
-             "-ac", "1", "-ar", "16000",
-             f"{audio_out_path}/{audio_filename}.wav", "-y"],
-             check=True
-        )
+        if audio_file.filename.endswith(".mp3"): # if file is mp3, convert
+            audio_file.save(os.path.join(audio_in_path, audio_file.filename))
+            subprocess.run(
+                ["ffmpeg", "-i", f"{audio_in_path}/{audio_file.filename}",
+                "-ac", "1", "-ar", "16000",
+                f"{audio_out_path}/{audio_filename}.wav", "-y"],
+                check=True
+            )
+            audio, sample_rate = sf.read(f"{audio_out_path}/{audio_filename}.wav")
+        elif audio_file.filename.endswith(".wav"): # if the file is alrdy wav, then just read it directly from mem
+            audio_bytes = io.BytesIO(audio_file.read())
+            audio, sample_rate = sf.read(audio_bytes)
 
-        audio, sample_rate = sf.read(f"{audio_out_path}/{audio_filename}.wav")
+        input_values = processor(audio, return_tensors="pt", padding="longest", sampling_rate=16000).input_values
+        with torch.no_grad():
+            logits = model(input_values).logits
 
-        input_values = processor(audio, return_tensors="pt", padding="longest").input_values
-        logits = model(input_values).logits
         predicted_ids = torch.argmax(logits, dim=-1)
-
         transcription = processor.batch_decode(predicted_ids)[0]
-        duration = sf.info(f"{audio_out_path}/{audio_filename}.wav").duration
+        #duration = sf.info(f"{audio_out_path}/{audio_filename}.wav").duration
+        duration = len(audio) / 16000
 
         return jsonify({"transcription": transcription, "duration": str(duration)})
 
@@ -54,4 +67,4 @@ def audio_transcription():
         return jsonify({"error": "ffmpeg processing failed", "details": str(e)}), 500
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=port, debug=True)
+    app.run(host="0.0.0.0", port=port, debug=True, threaded=True)
