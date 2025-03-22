@@ -29,7 +29,7 @@ def mp3_to_wav(filename):
 def transcribe_single_audio(filename):
     audio_filepath = os.path.join(AUDIO_DIR, filename)
     if not os.path.exists(audio_filepath):
-        return {"filename": filename, "transcription": "File not found.", "duration": 0.0}
+        return filename, "File not found.", 0.0
 
     try:
         with open(audio_filepath, "rb") as file:
@@ -39,7 +39,7 @@ def transcribe_single_audio(filename):
             else:
                 return filename, f"error {response.status_code}", "0.0"
     except Exception as e:
-        return filename, f"error: {str(e)}"
+        return filename, f"error: {str(e)}", 0.0
 
 def process_audio_files():
     df = pd.read_csv(CSV_FILE)
@@ -62,8 +62,9 @@ def process_audio_files():
             future = executor.submit(transcribe_single_audio, file) # submit task to thread pool
             futures[future] = file
         for f in as_completed(futures):
-            filename, transcription = f.result()
+            filename, transcription, duration = f.result()
             df.loc[df["filename"]==filename, "generated_text"] = transcription
+            df.loc[df["filename"] == filename, "duration"] = duration
 
     df["filename"] = df["filename"].str.replace(".wav", ".mp3", regex=False)
     df.to_csv(CSV_FILE, index=False)

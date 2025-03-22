@@ -61,7 +61,7 @@ def audio_transcription():
         #duration = sf.info(f"{audio_out_path}/{audio_filename}.wav").duration
         duration = round(len(audio) / 16000, 1)
 
-        return jsonify({"transcription": transcription, "duration": str(duration)})
+        return jsonify({"transcription": transcription, "duration": duration})
 
     except subprocess.CalledProcessError as e:
         return jsonify({"error": "ffmpeg processing failed", "details": str(e)}), 500
