@@ -30,6 +30,11 @@ gunicorn -w 3 --threads 2 -b 0.0.0.0:8001 asr_api:app --preload --timeout 180
 ```
 I have 8 CPU cores, and to not max out the cores, I decided to start it with 3 worker processes that can handle 2 threads in parallel so it is 6 total requests. --preload loads the model before forking the workers. --timeout gives enough time for slow or large audio files.
 
+## Task 4
+1. Run ``` docker-compose up -d ``` to start 2 node cluster elasticsearch services.
+2. To verify if cv-transcriptions index is created, run ``` http://localhost:9200/_cat/indices ```
+3. To verify if the documents exist in the index, run ``` http://localhost:9200/cv-transcriptions/_search ```
+
 ## References
 1. ffmpeg audio file conversion and resampling: https://stackoverflow.com/questions/67880409/ffmpeg-how-to-resample-audio-file
 2. Soundfile python library: https://python-soundfile.readthedocs.io/en/0.13.1/#
