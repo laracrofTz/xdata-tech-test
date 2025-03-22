@@ -35,3 +35,8 @@ I have 8 CPU cores, and to not max out the cores, I decided to start it with 3 w
 2. Soundfile python library: https://python-soundfile.readthedocs.io/en/0.13.1/#
 3. Gunicorn: https://flask.palletsprojects.com/en/stable/deploying/gunicorn/
 4. Thread Pool Executor Python: https://docs.python.org/3/library/concurrent.futures.html
+5. Data ingestion into Elastic Search Backend: https://betterstack.com/community/questions/import-csv-into-elasticsearch/, https://theaidigest.in/load-csv-into-elasticsearch-using-python/
+6. Python icon: https://www.flaticon.com/free-icons/python
+7. Search-UI: https://www.elastic.co/guide/en/search-ui/current/overview.html
+8. Elasticsearch Guide: https://medium.com/data-science/mastering-elasticsearch-a-beginners-guide-to-powerful-searches-and-precision-part-1-87686fec9808
+
