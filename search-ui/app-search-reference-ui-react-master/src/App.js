@@ -11,7 +11,6 @@ import {
   PagingInfo,
   ResultsPerPage,
   Paging,
-  Sorting,
   WithSearch
 } from "@elastic/react-search-ui";
 import { Layout } from "@elastic/react-search-ui-views";
@@ -39,6 +38,7 @@ const config = {
           fallback: true
         }
       },
+      filename: { raw: {} },
       duration: { raw: {} },
       age: { raw: {} },
       gender: { raw: {} },
@@ -60,16 +60,6 @@ const config = {
       }
     }
   },
-  // autocompleteQuery:{
-  //   suggestions: {
-  //     size: 5,
-  //     types:{
-  //       documents: {
-  //         fields: ["generated_text"]
-  //       }
-  //     }
-  //   }
-  // },
   apiConnector: connector,
   alwaysSearchOnInitialLoad: true
 };
