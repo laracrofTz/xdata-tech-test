@@ -1,4 +1,3 @@
-version: "3.8"
 services:
   es01:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.15.2
@@ -10,6 +9,11 @@ services:
       - cluster.initial_master_nodes=es01
       - bootstrap.memory_lock=true
       - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - http.cors.enabled=true
+      - http.cors.allow-origin=*
+      - http.cors.allow-methods=OPTIONS, HEAD, GET, POST, PUT, DELETE
+      - http.cors.allow-headers=X-Requested-With,Content-Type,Content-Length,Authorization,x-elastic-client-meta
+
     ulimits:
       memlock:
         soft: -1
