@@ -1,0 +1,14 @@
+services:
+  search-ui:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: search-ui
+    ports:
+      - "3001:80"
+    networks:
+      - elastic
+
+networks:
+  elastic:
+    driver: bridge
