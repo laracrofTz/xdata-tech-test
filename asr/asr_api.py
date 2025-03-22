@@ -66,5 +66,14 @@ def audio_transcription():
     except subprocess.CalledProcessError as e:
         return jsonify({"error": "ffmpeg processing failed", "details": str(e)}), 500
 
+    finally:
+        # clean up the audio files here
+        mp3_dir = os.path.join(audio_in_path, f"{audio_filename}.mp3")
+        wav_dir = os.path.join(audio_out_path, f"{audio_filename}.wav")
+        if os.path.exists(mp3_dir):
+            os.remove(mp3_dir)
+        if os.path.exists(wav_dir):
+            os.remove(wav_dir)
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=port, debug=True, threaded=True)

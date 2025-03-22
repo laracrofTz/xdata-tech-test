@@ -1,0 +1,7 @@
+services:
+  asr-api:
+    build:
+      context: ../
+      dockerfile: ./asr/Dockerfile
+    ports:
+      - "8001:8001"
