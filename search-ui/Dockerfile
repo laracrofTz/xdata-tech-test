@@ -3,12 +3,10 @@ FROM node:18 AS build
 WORKDIR /app
 
 # copy all pkg files and install dependencies
-COPY app-search-reference-ui-react-master/package*.json ./
-COPY app-search-reference-ui-react-master/ ./
+COPY ./app-search-reference-ui-react-master/package*.json ./
+COPY ./app-search-reference-ui-react-master/ ./
 
 RUN npm install
-
-#COPY app-search-reference-ui-react-master/ /app
 
 RUN npm run build
 

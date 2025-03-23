@@ -1,0 +1,83 @@
+services:
+  es01:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.15.2
+    container_name: es01
+    environment:
+      - node.name=es01
+      - cluster.name=cv-transcriptions-cluster
+      - discovery.seed_hosts=es01,es02
+      - cluster.initial_master_nodes=es01
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - http.cors.enabled=true
+      - http.cors.allow-origin=*
+      - http.cors.allow-methods=OPTIONS, HEAD, GET, POST, PUT, DELETE
+      - http.cors.allow-headers=X-Requested-With,Content-Type,Content-Length,Authorization,x-elastic-client-meta
+
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - data01:/usr/share/elasticsearch/data
+    ports:
+      - 9200:9200
+    networks:
+      - elastic
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9200/_cluster/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+  es02:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.15.2
+    container_name: es02
+    environment:
+      - node.name=es02
+      - node.roles=data
+      - cluster.name=cv-transcriptions-cluster
+      - discovery.seed_hosts=es01,es02
+      - cluster.initial_master_nodes=es01
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - data02:/usr/share/elasticsearch/data
+    networks:
+      - elastic
+
+  search-ui:
+    build:
+      context: ./search-ui
+      dockerfile: Dockerfile
+    container_name: search-ui
+    depends_on:
+      - data-ingest
+    ports:
+      - "3001:80"
+    networks:
+      - elastic
+
+  data-ingest:
+    build:
+      context: ./elastic-backend
+      dockerfile: Dockerfile
+    container_name: data-ingest
+    depends_on:
+      es01:
+        condition: service_healthy
+    networks:
+      - elastic
+
+volumes:
+  data01:
+    driver: local
+  data02:
+    driver: local
+
+networks:
+  elastic:
+    driver: bridge
